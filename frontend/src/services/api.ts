@@ -8,7 +8,18 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   // Ensure the endpoint starts with a slash
   const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = `${API_BASE_URL}${normalizedEndpoint}`;
+  
+  // For Hugging Face Spaces, the API might need to be accessed differently
+  // If the API_BASE_URL ends with .hf.space, we might need to handle it specially
+  let url = `${API_BASE_URL}${normalizedEndpoint}`;
+  
+  // Check if we're calling the backend on Hugging Face Spaces
+  if (API_BASE_URL.includes('.hf.space')) {
+    // For Hugging Face Spaces, sometimes the API endpoints need to be accessed differently
+    // The FastAPI endpoints might be available at a different path
+    // Try to construct the URL appropriately
+    url = `${API_BASE_URL}${normalizedEndpoint}`;
+  }
 
   const headers = {
     'Content-Type': 'application/json',
