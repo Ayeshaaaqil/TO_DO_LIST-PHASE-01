@@ -1,122 +1,103 @@
+<!-- SYNC IMPACT REPORT
+Version change: 2.0.0 → 3.0.0
+Modified principles: Added Phase III-specific principles for AI and MCP usage
+Added sections: Phase III technology matrix with AI/MCP details, MCP-specific rules
+Removed sections: Generic Phase III description
+Templates requiring updates:
+- ⚠ .specify/templates/plan-template.md - needs update for AI/MCP tools
+- ⚠ .specify/templates/spec-template.md - needs update for AI/MCP specs
+- ⚠ .specify/templates/tasks-template.md - needs update for AI/MCP tasks
+Follow-up TODOs: Update templates to reflect new AI/MCP requirements
+-->
+
 # The Evolution of Todo - Project Constitution
 
-## Project Overview
+## Core Principles
 
-"The Evolution of Todo" is a simple in-memory command-line todo application implemented in Python. This is Phase I of the project, focusing on building a solid foundation with core functionality. The application will provide users with a command-line interface to manage their tasks efficiently without the complexity of persistence mechanisms.
+### I. Phase-Gated Development
+All features and technologies must align with the current development phase. Phase I (in-memory console app) → Phase II (full-stack web app) → Phase III+ (advanced cloud/agents/AI). No technology or feature from a later phase may be introduced early without explicit approval and clear justification.
 
-The primary goal of this phase is to establish a clean, maintainable codebase that follows Spec-Driven Development (SDD) principles. The application will support basic todo operations including adding, listing, updating, deleting, and marking tasks as complete/incomplete.
+### II. Full-Stack Web Architecture
+The application follows a modern full-stack architecture with a Python REST API backend, Neon Serverless PostgreSQL database, SQLModel for data management, and a Next.js frontend with React and TypeScript. All components must be designed to work cohesively within this architecture.
 
-## Core Values
+### III. Test-First (NON-NEGOTIABLE)
+TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced. All new features must have comprehensive unit, integration, and end-to-end tests before merging.
 
-1. **Spec-Driven Development First**: Every feature MUST start from a written specification in the specs/ folder. Never write code without an approved spec. Use Spec-Kit Plus workflow strictly: constitution → specify → plan → tasks → implement.
+### IV. Integration Testing
+Focus areas requiring integration tests: API contract tests, Database interactions, Authentication flows, Frontend-backend communication, Shared schemas between services.
 
-2. **Clean Code and Readability**: Favor simple, readable code over clever solutions. Follow PEP 8 strictly. Use meaningful variable/function names. Keep functions short (<50 lines where possible). Add docstrings to all modules, classes, and functions.
+### V. Technology Compliance
+All implementations must strictly adhere to the approved technology matrix. No unauthorized frameworks, libraries, or services may be introduced without explicit constitutional amendment. Technology choices must align with the current phase of development.
 
-3. **Proper Project Structure**: Organize the codebase according to a standard Python project layout with clear separation of concerns.
+### VI. Authentication-First Design
+Authentication and security must be considered from the initial design phase. Better Auth must be implemented for all user-facing features. All user data must be properly secured and access-controlled from the beginning of Phase II development.
 
-4. **Simplicity over Features**: Prioritize simple, working solutions over complex feature-rich implementations.
+### VII. AI and MCP Governance (Phase III+)
+AI agents may ONLY interact with the system via MCP tools. MCP tools must not store in-memory state. Conversation context must be persisted and retrievable. No autonomous background agents. No multi-agent orchestration beyond documented scope. This principle ensures controlled and stateful AI interactions within the system.
 
-5. **Error Handling**: Design with robust error handling to provide a good user experience even when inputs are invalid.
+### VIII. State Management (Phase III+)
+All conversation and task state must be persisted in the database. MCP tools must be stateless and rely on database persistence. This ensures reliability, scalability, and proper state management for AI-driven interactions.
 
-## Technical Principles
 
-1. **In-Memory Only**: All tasks stored in a list/dict in memory. No persistence to file or database in this phase.
+## Technology Matrix
 
-2. **CLI Interface**: Implement a simple text-based menu or command loop. Provide user-friendly prompts and handle invalid inputs gracefully.
+### Phase I (Completed)
+- Architecture: In-memory console application only
+- Language: Python
+- Interface: Command-line interface (CLI)
+- Persistence: In-memory storage only
+- Authentication: Not allowed
+- External Dependencies: Python standard library (with optional rich/typer for CLI enhancement)
 
-3. **Modular Design**: Structure code to be modular and testable with clear separation of concerns.
+### Phase II (Current)
+- Backend: Python REST API
+- Database: Neon Serverless PostgreSQL
+- ORM/Data layer: SQLModel or equivalent
+- Frontend: Next.js (React, TypeScript)
+- Authentication: Better Auth (signup/signin)
+- Architecture: Full-stack web application
+- Authentication: Allowed starting Phase II
+- Web frontend: Allowed starting Phase II
+- Neon PostgreSQL: Allowed starting Phase II
 
-4. **PEP 8 Compliance**: Strictly follow Python's style guide for consistency and readability.
+### Phase III (AI/MCP Enabled)
+- AI Logic: OpenAI Agents SDK
+- Conversational Interface: Stateless chat API
+- Tooling: Model Context Protocol (MCP)
+- MCP Server: Official MCP SDK
+- Architecture: Agent-driven task management
+- State Management: Persist conversation and task state in database
+- MCP tools must be stateless and rely on database persistence
+- Rules:
+  - AI agents may ONLY interact with the system via MCP tools
+  - MCP tools must not store in-memory state
+  - Conversation context must be persisted and retrievable
+  - Phase II authentication, frontend, and database remain unchanged
+  - No autonomous background agents
+  - No multi-agent orchestration beyond documented scope
+- Authorization: This amendment authorizes AI and MCP usage starting Phase III only
 
-5. **No External Dependencies**: Use only the Python standard library for core logic (optional: use rich or typer for better CLI if it improves UX without complexity).
+## Development Workflow
 
-## Required Features
+### Feature Implementation Process
+1. **Specification**: Every feature starts with a written specification in the specs/ folder
+2. **Planning**: Architecture and technical approach must be documented in plan.md
+3. **Task Breakdown**: Implementation tasks must be detailed in tasks.md
+4. **Implementation**: Code following the approved specifications
+5. **Testing**: All features must pass unit, integration, and acceptance tests
+6. **Review**: Code review must verify constitutional compliance
 
-1. **Add Task**: Support adding tasks with a required title and optional description.
+### Code Quality Standards
+- Clean, readable code over complex solutions
+- Follow language-specific style guides (PEP 8 for Python, etc.)
+- Comprehensive documentation for all modules, classes, and functions
+- Proper error handling and graceful degradation
+- Modular design with clear separation of concerns
 
-2. **List/View Tasks**: Display all tasks showing ID, title, description, and status (pending/completed) with clear indicators.
+## Governance
 
-3. **Update Task**: Allow updating tasks by ID, supporting updates to title or description.
+The constitution supersedes all other development practices. All pull requests and code reviews must verify constitutional compliance. Any deviation from these principles requires a formal constitutional amendment with proper documentation and approval.
 
-4. **Delete Task**: Enable deletion of tasks by ID.
+Technology choices must be justified and aligned with the current development phase. Complexity must be justified with clear value propositions.
 
-5. **Mark Complete/Incomplete**: Allow toggling task status by ID.
-
-6. **Error Handling**: Validate inputs and handle edge cases (empty list, invalid ID, etc.) without crashing.
-
-## Project Structure
-
-The project follows a standard Python package structure:
-
-```
-todo/
-├── src/
-│   └── todo/
-│       ├── __init__.py
-│       ├── main.py          # Entry point with CLI loop
-│       ├── task.py          # Task model
-│       └── todo_list.py     # In-memory storage and operations
-├── tests/
-│   ├── test_task.py
-│   └── test_todo_list.py
-├── specs/
-│   └── <feature-name>/
-│       ├── spec.md
-│       ├── plan.md
-│       └── tasks.md
-├── .specify/
-│   ├── memory/
-│   │   └── constitution.md  # This file
-│   ├── scripts/
-│   └── templates/
-├── history/
-│   ├── prompts/
-│   └── adr/
-├── README.md
-├── CLAUDE.md
-├── pyproject.toml
-└── .gitignore
-```
-
-## Tooling and Documentation
-
-1. **Development Environment**: Use uv for virtual environment and dependencies management.
-
-2. **Python Version**: Target Python 3.13+ for modern language features and performance.
-
-3. **Testing Framework**: Use pytest for unit tests with good coverage of operations.
-
-4. **Documentation Requirements**:
-   - README.md: Setup instructions (uv usage), how to run, example commands
-   - CLAUDE.md: Detailed instructions for continuing work with Claude Code and Spec-Kit Plus
-   - specs/: Keep full specs history for all features
-
-5. **Spec Management**: Maintain complete specifications in specs/ folder with spec.md, plan.md, and tasks.md for each feature.
-
-## General Rules and Guidelines
-
-1. **Confirmation for Changes**: Always ask for confirmation before major changes to ensure alignment with project goals.
-
-2. **Modular Code**: Prefer modular, testable code over monolithic implementations.
-
-3. **No Unnecessary Boilerplate**: Include only code that serves a clear purpose.
-
-4. **Graceful Error Handling**: Handle invalid inputs and edge cases gracefully without crashing the application.
-
-5. **User Experience**: Prioritize clear, understandable error messages and user prompts.
-
-6. **Validation**: Implement input validation to ensure data integrity and prevent runtime errors.
-
-7. **Testing**: Write comprehensive unit tests for all core functions to ensure reliability and prevent regressions.
-
-## Implementation Workflow
-
-This project follows the Spec-Kit Plus methodology:
-
-1. **Constitution**: Establish project principles (this document)
-2. **Specify**: Create detailed feature specifications in specs/
-3. **Plan**: Design the architecture for each feature
-4. **Tasks**: Break down implementation into testable tasks
-5. **Implement**: Write code following the approved specifications
-
-This workflow ensures that all development is specification-driven and that the project maintains consistency with its core values throughout its evolution.
+**Version**: 3.0.0 | **Ratified**: 2025-01-01 | **Last Amended**: 2026-01-07
