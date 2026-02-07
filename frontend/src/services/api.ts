@@ -9,17 +9,8 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   // Ensure the endpoint starts with a slash
   const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  // For Hugging Face Spaces, the API might need to be accessed differently
-  // If the API_BASE_URL ends with .hf.space, we might need to handle it specially
+  // Construct the URL
   let url = `${API_BASE_URL}${normalizedEndpoint}`;
-  
-  // Check if we're calling the backend on Hugging Face Spaces
-  if (API_BASE_URL.includes('.hf.space')) {
-    // For Hugging Face Spaces, sometimes the API endpoints need to be accessed differently
-    // The FastAPI endpoints might be available at a different path
-    // Try to construct the URL appropriately
-    url = `${API_BASE_URL}${normalizedEndpoint}`;
-  }
 
   const headers = {
     'Content-Type': 'application/json',
@@ -33,8 +24,9 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   }
 
   try {
-    // Log the URL being accessed for debugging
+    // Log the URL and method being accessed for debugging
     console.log('Making API request to:', url);
+    console.log('Method:', options.method || 'GET');
 
     const response = await fetch(url, {
       ...options,
@@ -68,6 +60,11 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       if (response.status === 404) {
         console.error(`API endpoint not found: ${url}`);
         throw new Error(`API endpoint not found: ${normalizedEndpoint}. Please check if the backend service is running correctly.`);
+      }
+      // Check if it's a 405 error (Method Not Allowed)
+      if (response.status === 405) {
+        console.error(`Method not allowed for endpoint: ${url}`);
+        throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. The backend may not support this operation.`);
       }
       // For other errors, try to get more details from the response
       let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
