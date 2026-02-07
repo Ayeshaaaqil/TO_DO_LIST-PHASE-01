@@ -6,7 +6,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ayesha-aaqil-ch
 
 // Generic API request function
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Ensure the endpoint starts with a slash
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${normalizedEndpoint}`;
 
   const headers = {
     'Content-Type': 'application/json',
@@ -44,6 +46,11 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     }
 
     if (!response.ok) {
+      // Check if it's a 404 error and provide more specific messaging
+      if (response.status === 404) {
+        console.error(`API endpoint not found: ${url}`);
+        throw new Error(`API endpoint not found: ${normalizedEndpoint}. Please check if the backend service is running correctly.`);
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
