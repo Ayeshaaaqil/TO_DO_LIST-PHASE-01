@@ -2,7 +2,7 @@
 
 import { getAuthToken } from './auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ayesha-aaqil-chatbot-phase3.hf.space';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Generic API request function
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
