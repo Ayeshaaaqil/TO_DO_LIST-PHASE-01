@@ -2,7 +2,7 @@
 
 import { getAuthToken } from './auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ayesha-aaqil-chatbot-phase3.hf.space';
 
 // Generic API request function
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
@@ -19,32 +19,42 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     (headers as any)['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      mode: 'cors', // Enable CORS
+      credentials: 'omit' // Don't include cookies in cross-origin requests
+    });
 
-  // If we get a 401 or 403, clear auth and redirect to sign in
-  if (response.status === 401 || response.status === 403) {
-    const errorData = await response.json().catch(() => ({}));
-    console.error('Authentication error:', errorData);
+    // If we get a 401 or 403, clear auth and redirect to sign in
+    if (response.status === 401 || response.status === 403) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error('Authentication error:', errorData);
 
-    // Clear authentication state
-    await import('./auth').then(auth => auth.clearAuth());
+      // Clear authentication state
+      await import('./auth').then(auth => auth.clearAuth());
 
-    // Redirect to sign in (in a browser environment)
-    if (typeof window !== 'undefined') {
-      window.location.href = '/signin';
+      // Redirect to sign in (in a browser environment)
+      if (typeof window !== 'undefined') {
+        window.location.href = '/signin';
+      }
+
+      throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
     }
 
-    throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
-  }
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    return response.json();
+  } catch (error: any) {
+    console.error('API request error:', error);
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Failed to connect to server. Please check your connection and try again.');
+    }
+    throw error;
   }
-
-  return response.json();
 };
 
 // Authentication API functions
