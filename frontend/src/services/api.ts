@@ -143,66 +143,32 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
 // Authentication API functions
 export const authAPI = {
   signup: async (email: string, password: string, name?: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Signup failed: ${response.status} ${response.statusText}`);
-      }
-
-      return response.json();
-    } catch (error: any) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Failed to connect to server. Please check your connection and try again.');
-      }
-      throw error;
-    }
+    return apiRequest('/api/auth/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, name }),
+    });
   },
 
   signin: async (email: string, password: string) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Signin failed: ${response.status} ${response.statusText}`);
-      }
-
-      return response.json();
-    } catch (error: any) {
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new Error('Failed to connect to server. Please check your connection and try again.');
-      }
-      throw error;
-    }
+    return apiRequest('/api/auth/signin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
   },
 
   signout: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/signout`, {
+    return apiRequest('/api/auth/signout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-
-    if (!response.ok) {
-      throw new Error('Signout failed');
-    }
-
-    return response.json();
   },
 };
 
@@ -260,6 +226,9 @@ export const chatAPI = {
   sendMessage: async (message: string, conversationId?: string) => {
     return apiRequest('/api/chat', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         message,
         conversation_id: conversationId || null
