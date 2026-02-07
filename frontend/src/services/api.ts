@@ -22,6 +22,9 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   }
 
   try {
+    // Log the URL being accessed for debugging
+    console.log('Making API request to:', url);
+
     const response = await fetch(url, {
       ...options,
       headers,
@@ -29,6 +32,9 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       credentials: 'omit', // Don't include cookies in cross-origin requests
       redirect: 'follow' // Follow redirects
     });
+
+    // Log the response status for debugging
+    console.log('API response status:', response.status);
 
     // If we get a 401 or 403, clear auth and redirect to sign in
     if (response.status === 401 || response.status === 403) {
