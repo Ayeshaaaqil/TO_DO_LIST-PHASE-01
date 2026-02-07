@@ -98,6 +98,16 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
           throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. The backend may not support this operation.`);
         }
       }
+      // Check if it's a 404 error for specific endpoints that should exist
+      if (response.status === 404) {
+        // Check if this is a critical endpoint that should exist in the full backend
+        if (normalizedEndpoint.includes('/api/auth/') || normalizedEndpoint.includes('/api/todos')) {
+          console.error(`Critical API endpoint not found: ${url}`);
+          console.error('This suggests the backend might be a simplified version without auth/todo endpoints.');
+          
+          throw new Error(`API endpoint not found: ${normalizedEndpoint}. The backend may be a simplified version that doesn't include authentication or todo management features. Ensure you're connecting to the full backend implementation.`);
+        }
+      }
       // For other errors, try to get more details from the response
       let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
       try {
