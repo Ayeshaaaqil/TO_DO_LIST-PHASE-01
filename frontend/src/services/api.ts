@@ -2,6 +2,10 @@
 
 import { getAuthToken } from './auth';
 
+// Check if we're in a Hugging Face Space environment
+const isHuggingFaceSpace = process.env.NEXT_PUBLIC_API_URL?.includes('.hf.space') || false;
+
+// For Hugging Face Spaces, we might need to use a different approach
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Generic API request function
@@ -27,21 +31,41 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
     // Log the URL and method being accessed for debugging
     console.log('Making API request to:', url);
     console.log('Method:', options.method || 'GET');
+    console.log('Headers:', headers);
 
-    const response = await fetch(url, {
+    // For Hugging Face Spaces, we might need to handle the request differently
+    // Some Hugging Face Spaces might require specific headers or request formatting
+    const fetchOptions = {
       ...options,
       headers,
       mode: 'cors', // Enable CORS
       credentials: 'omit', // Don't include cookies in cross-origin requests
       redirect: 'follow' // Follow redirects
-    });
+    };
+
+    // Make the request
+    const response = await fetch(url, fetchOptions);
 
     // Log the response status for debugging
     console.log('API response status:', response.status);
+    
+    // Attempt to read response body for debugging (only if response has content)
+    let responseBody;
+    try {
+      if (response.headers.get('content-type')?.includes('application/json')) {
+        responseBody = await response.clone().json();
+        console.log('API response body:', responseBody);
+      } else {
+        responseBody = await response.clone().text();
+        console.log('API response body (text):', responseBody);
+      }
+    } catch (e) {
+      console.log('Could not parse response body:', e);
+    }
 
     // If we get a 401 or 403, clear auth and redirect to sign in
     if (response.status === 401 || response.status === 403) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = responseBody || await response.json().catch(() => ({}));
       console.error('Authentication error:', errorData);
 
       // Clear authentication state
@@ -64,13 +88,21 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       // Check if it's a 405 error (Method Not Allowed)
       if (response.status === 405) {
         console.error(`Method not allowed for endpoint: ${url}`);
-        throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. The backend may not support this operation.`);
+        console.error('Response body for 405 error:', responseBody);
+        
+        // For Hugging Face Spaces, this might indicate that the API endpoints are not properly exposed
+        // The FastAPI endpoints might not be accessible if only the Gradio interface is exposed
+        if (isHuggingFaceSpace) {
+          throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. This may indicate that the FastAPI endpoints are not properly exposed in the Hugging Face Space. The backend may only be serving the Gradio interface.`);
+        } else {
+          throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. The backend may not support this operation.`);
+        }
       }
       // For other errors, try to get more details from the response
       let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
       try {
-        const errorDetail = await response.json();
-        if (errorDetail.detail) {
+        const errorDetail = responseBody;
+        if (errorDetail?.detail) {
           errorMessage += ` - Detail: ${errorDetail.detail}`;
         }
       } catch (e) {
