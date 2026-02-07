@@ -26,7 +26,8 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
       ...options,
       headers,
       mode: 'cors', // Enable CORS
-      credentials: 'omit' // Don't include cookies in cross-origin requests
+      credentials: 'omit', // Don't include cookies in cross-origin requests
+      redirect: 'follow' // Follow redirects
     });
 
     // If we get a 401 or 403, clear auth and redirect to sign in
@@ -51,14 +52,25 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
         console.error(`API endpoint not found: ${url}`);
         throw new Error(`API endpoint not found: ${normalizedEndpoint}. Please check if the backend service is running correctly.`);
       }
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      // For other errors, try to get more details from the response
+      let errorMessage = `API request failed: ${response.status} ${response.statusText}`;
+      try {
+        const errorDetail = await response.json();
+        if (errorDetail.detail) {
+          errorMessage += ` - Detail: ${errorDetail.detail}`;
+        }
+      } catch (e) {
+        // If we can't parse the error response, use the generic message
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();
   } catch (error: any) {
     console.error('API request error:', error);
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      throw new Error('Failed to connect to server. Please check your connection and try again.');
+      // This usually indicates a network error or CORS issue
+      throw new Error('Failed to connect to server. This could be due to network issues or CORS policy. Please check if the backend service is running and accessible.');
     }
     throw error;
   }
