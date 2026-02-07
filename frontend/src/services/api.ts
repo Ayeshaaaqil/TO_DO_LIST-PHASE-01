@@ -90,6 +90,14 @@ const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
         console.error(`Method not allowed for endpoint: ${url}`);
         console.error('Response body for 405 error:', responseBody);
         
+        // Check if this is a critical endpoint that should exist in the full backend
+        if (normalizedEndpoint.includes('/api/auth/') || normalizedEndpoint.includes('/api/todos')) {
+          console.error(`Critical API endpoint not allowed: ${url}`);
+          console.error('This suggests the backend is a simplified version without auth/todo endpoints.');
+          
+          throw new Error(`Method not allowed for endpoint: ${normalizedEndpoint}. The backend appears to be a simplified version that doesn't include authentication or todo management features. Ensure you're connecting to the full backend implementation with all required endpoints.`);
+        }
+        
         // For Hugging Face Spaces, this might indicate that the API endpoints are not properly exposed
         // The FastAPI endpoints might not be accessible if only the Gradio interface is exposed
         if (isHuggingFaceSpace) {
