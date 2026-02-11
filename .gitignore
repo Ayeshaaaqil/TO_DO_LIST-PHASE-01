@@ -158,3 +158,6 @@ debug/
 *.local
 .vercel
 .env*.local
+git_backup/  
+TO_DO_LIST-PHASE-01/  
+hackaton2/ 
